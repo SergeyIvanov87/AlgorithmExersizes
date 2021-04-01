@@ -19,7 +19,8 @@ using graph_node_wptr_t = std::weak_ptr<node>;
 
 class graph_list : public aux_storage<typename node::helper_t>
 {
-    using adj_list_t =  std::set<graph_node_ptr_t>;
+    using edge_weight_t = typename node::helper_t::estimate_t;
+    using adj_list_t =  std::map<graph_node_ptr_t, edge_weight_t>;
     using adj_table_t = std::map<graph_node_wptr_t, adj_list_t>;
     adj_table_t table;
 
@@ -32,17 +33,17 @@ public:
         return n;
     }
 
-    void fill_graph(graph_node_ptr_t s_node, std::initializer_list<graph_node_ptr_t> depends, bool directional = false)
+    void fill_graph(graph_node_ptr_t s_node, std::initializer_list<typename adj_list_t::value_type> depends, bool directional = false)
     {
         auto &adj_for_s_node = table[s_node];
-        adj_for_s_node.insert(depends.begin(), depends.end());
+        adj_for_s_node.insert(depends);
 
         if(!directional)
         {
-            for(const auto & parent : depends)
+            for(const typename adj_list_t::value_type &parent : depends)
             {
-                auto &adj_for_parent = table[parent];
-                adj_for_parent.insert(s_node);
+                auto &adj_for_parent = table[parent.first];
+                adj_for_parent.emplace(s_node, parent.second);
             }
         }
     }
@@ -74,7 +75,7 @@ public:
                 const auto& adj_list = table[n];
                 for(auto & child : adj_list)
                 {
-                    if(child->get_aux()->is_not_visited())
+                    if(child.first->get_aux()->is_not_visited())
                     {
                         all_black = false;
                         break;
@@ -103,10 +104,10 @@ public:
             const auto& adj_list = table[n];
             for(auto& child : adj_list)
             {
-                if (child->get_aux()->is_not_visited())
+                if (child.first->get_aux()->is_not_visited())
                 {
-                    child->get_aux()->set_predescessor(n);
-                    stack.push(child);
+                    child.first->get_aux()->set_predescessor(n);
+                    stack.push(child.first);
                     break; //?
                 }
             }
@@ -143,11 +144,11 @@ public:
             const auto& adj_list = table[n];
             for(const auto child : adj_list)
             {
-                if (child->get_aux()->is_not_visited())
+                if (child.first->get_aux()->is_not_visited())
                 {
-                    child->get_aux()->visit(n->get_aux()->get_d() + 1);
-                    child->get_aux()->set_predescessor(n);
-                    queue.push(child);
+                    child.first->get_aux()->visit(n->get_aux()->get_d() + 1);
+                    child.first->get_aux()->set_predescessor(n);
+                    queue.push(child.first);
                 }
             }
 
@@ -181,17 +182,105 @@ public:
         s->get_aux()->set_sp_estimate(0);
     }
 
-    void relax(graph_node_ptr_t u, graph_node_ptr_t w, size_t omega)
+    template<class Tracer>
+    void relax(graph_node_ptr_t u, graph_node_ptr_t v, edge_weight_t w, Tracer tracer)
     {
-        if(w->get_aux()->get_sp_estimate() > u->get_aux()->get_sp_estimate() + omega)
+        if(v->get_aux()->get_sp_estimate() > u->get_aux()->get_sp_estimate() + w)
         {
-            w->get_aux()->set_sp_estimate(u->get_aux()->get_sp_estimate() + omega);
-            w->get_aux()->set_predescessor(u);
+            v->get_aux()->set_sp_estimate(u->get_aux()->get_sp_estimate() + w);
+            v->get_aux()->set_predescessor(u);
         }
     }
 
-private:
+    template<class Tracer>
+    bool BellmanFord_ShortPath(graph_node_ptr_t s, Tracer tracer)
+    {
+        initialize_single_source(s);
 
+        // for i = 1 to |G.V| - 1
+        for ( size_t i = 0; i < table.size() -1 ; i ++)
+        {
+            for(typename adj_table_t::value_type &adjListValueType : table)
+            {
+                auto u = adjListValueType.first.lock();
+
+                if(u->get_aux()->get_sp_estimate() == node::helper_t::inf())
+                {
+                    continue;
+                }
+                tracer(u, graph_node_ptr_t{});
+
+                // for edge (u,v) -> G,E
+                for (auto v_w : adjListValueType.second)
+                {
+                    auto [v, w] = v_w;
+                    tracer(u, v);
+
+                    relax(u, v, w, tracer);
+
+                    tracer(u, v);
+                }
+            }
+        }
+
+
+        for(typename adj_table_t::value_type &adjListValueType : table)
+        {
+            auto u = adjListValueType.first.lock();
+            for (auto v_w : adjListValueType.second)
+            {
+                auto [v, w] = v_w;
+
+                if(v->get_aux()->get_sp_estimate() > u->get_aux()->get_sp_estimate() + w)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+
+    struct NodeGreaterPriorityHelper
+    {
+        bool operator() (const graph_node_wptr_t& lhs, const graph_node_wptr_t& rhs)
+        {
+            return lhs.lock()->get_aux()->get_sp_estimate() > rhs.lock()->get_aux()->get_sp_estimate();
+        }
+    };
+    template<class Tracer>
+    void Dijkstra_ShortPath(graph_node_ptr_t s, Tracer tracer)
+    {
+        initialize_single_source(s);
+
+        std::priority_queue<graph_node_wptr_t,  std::vector<graph_node_wptr_t>, NodeGreaterPriorityHelper> Q;
+        Q.push(s);
+
+        std::set<graph_node_wptr_t> S;
+        while(!Q.empty())
+        {
+            auto n = Q.top().lock();
+            Q.pop();
+            S.insert(n);
+
+            const auto& adj_list = table[n];
+            for(const auto child : adj_list)
+            {
+                relax(n, child.first, child.second, tracer);
+            }
+
+            //decrease-key
+            std::priority_queue<graph_node_wptr_t,  std::vector<graph_node_wptr_t>, NodeGreaterPriorityHelper>().swap(Q);//Q.clear();
+            for(auto g_v : table)
+            {
+                if(S.find(g_v.first) != S.end())
+                {
+                    continue;
+                }
+                Q.push(g_v.first);
+            }
+        }
+    }
 };
 }
 #endif //SHORT_PATH_GRAPH_LIST_HPP

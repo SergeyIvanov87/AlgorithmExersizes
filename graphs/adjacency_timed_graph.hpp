@@ -48,6 +48,22 @@ public:
     }
 
     template<class Condition>
+    void dfs_recursive(Condition cond)
+    {
+        clear();
+
+        size_t time = 0;
+        for (auto s_node_with_list :  table)
+        {
+            auto [n, adj_list] = s_node_with_list;
+            if(n.lock()->get_aux()->is_not_visited())
+            {
+                dfs_recursive_visit(n, time, cond);
+            }
+        }
+    }
+
+    template<class Condition>
     graph_node_ptr_t dfs(graph_node_wptr_t s_node, Condition cond)
     {
         clear();
@@ -177,6 +193,26 @@ public:
 
 private:
 
+    template<class Condition>
+    void dfs_recursive_visit(graph_node_wptr_t s_node, size_t &time, Condition cond)
+    {
+        auto n = s_node.lock();
+        n->get_aux()->visit(++time);
+
+        cond(n);
+
+        const auto& adj_list = table[n];
+        for(auto & child : adj_list)
+        {
+            if(child->get_aux()->is_not_visited())
+            {
+                child->get_aux()->set_predescessor(n);
+                dfs_recursive_visit(child, time, cond);
+            }
+        }
+
+        n->get_aux()->finish(++time);
+    }
 };
 }
 #endif //TIMED_GRAPH_LIST_HPP

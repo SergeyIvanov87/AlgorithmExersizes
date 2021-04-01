@@ -1,6 +1,8 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.0)
 
-project(Exersizes CXX)
+project(Exersizes
+        VERSION ""
+        LANGUAGES CXX)
 
 
 #### GTEST ####
@@ -29,3 +31,6 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
 # Exersizes
 add_subdirectory(graphs)
+
+# Test
+add_subdirectory(test)

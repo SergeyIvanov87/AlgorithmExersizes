@@ -85,7 +85,7 @@ struct timed_predesc_helper : colored_timed_helper
         base_t::clear();
         weak_ptr_t().swap(predescessor);
     }
-private:
+protected:
     weak_ptr_t predescessor;
 };
 
@@ -94,7 +94,14 @@ template<class Node>
 struct shortest_path_helper : timed_predesc_helper<Node>
 {
     using base_t = timed_predesc_helper<Node>;
-    using estimate_t = size_t;
+    using estimate_t = long long;
+    using typename base_t::strong_ptr_t;
+    using base_t::predescessor;
+
+    static constexpr size_t inf()
+    {
+        return std::numeric_limits<estimate_t>::max();
+    }
 
     void set_sp_estimate(estimate_t est)
     {
@@ -109,7 +116,14 @@ struct shortest_path_helper : timed_predesc_helper<Node>
     void clear()
     {
         base_t::clear();
-        shortest_path_estimate = std::numeric_limits<estimate_t>::max();
+        shortest_path_estimate = inf();
+    }
+
+
+    //override
+    void set_predescessor(strong_ptr_t pred)
+    {
+        predescessor = pred;
     }
 private:
     size_t shortest_path_estimate;
