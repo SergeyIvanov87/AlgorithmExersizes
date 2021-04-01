@@ -109,6 +109,7 @@ int main(int argc, char * argv[])
             if(!n)
             {
                 std::cout << "nullptr" << std::endl;
+                return false;
             }
             std::cout << n.get() << ": " << n->value << ", {" << n->get_aux()->get_d() << ", " << n->get_aux()->get_f() << "}" << ", pred: " << n->get_aux()->get_predescessor().get() << std::endl;
             return false;
@@ -177,6 +178,16 @@ int main(int argc, char * argv[])
             std::cout << "is:\n";
             graph_main.print_path(u, x, printer);
 
+            std::cout << "graph DFS recursive: " << std::endl;
+            graph_main.dfs_recursive(printer);
+
+            std::cout << "path: " <<std::endl;
+            printer(u);
+            std::cout << "&\n";
+            printer(x);
+            std::cout << "is:\n";
+            graph_main.print_path(u, x, printer);
+
             std::cout << "graph DFS: " << std::endl;
             graph_main.dfs(w, printer);
             std::cout << "path: " <<std::endl;
@@ -221,6 +232,9 @@ int main(int argc, char * argv[])
                       << "\n\n" << std::endl;
         };
 
+
+
+
         {
             short_path::graph_list graph_main;
 
@@ -231,17 +245,17 @@ int main(int argc, char * argv[])
             short_path::graph_node_ptr_t z = graph_main.create_node("z");
 
             static const bool directional = true;
-            graph_main.fill_graph(s, { {t, 6}, {y, 7}}, directional);
-            graph_main.fill_graph(t, { {x, 5}, {y, 8}, {z, -4}}, directional);
-            graph_main.fill_graph(x, { {t, -2}, }, directional);
-            graph_main.fill_graph(y, { {x, -3}, {z, 9}}, directional);
-            graph_main.fill_graph(z, { {x, 7}, {s, 2}}, directional);
+            graph_main.fill_graph(s, { {t, 10}, {y, 5}}, directional);
+            graph_main.fill_graph(t, { {x, 1}, {y, 2}}, directional);
+            graph_main.fill_graph(x, { {z, 4}, }, directional);
+            graph_main.fill_graph(y, { {t, 3}, {x, 9}, {z, 2}}, directional);
+            graph_main.fill_graph(z, { {x, 6}, {s, 7}}, directional);
 
             std::cout << "graph DFS: " << std::endl;
             graph_main.dfs(s, printer);
 
-            std::cout << "Bellman-Ford" << std::endl;
-            graph_main.BellmanFord_ShortPath(s, trans_printer);
+            std::cout << "Dijkstra" << std::endl;
+            graph_main.Dijkstra_ShortPath(s, trans_printer);
 
             std::cout << "print s - z" << std::endl;
             graph_main.print_path(s, z, printer);

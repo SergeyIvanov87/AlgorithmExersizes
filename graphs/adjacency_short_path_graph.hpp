@@ -240,6 +240,47 @@ public:
         return true;
     }
 
+
+    struct NodeGreaterPriorityHelper
+    {
+        bool operator() (const graph_node_wptr_t& lhs, const graph_node_wptr_t& rhs)
+        {
+            return lhs.lock()->get_aux()->get_sp_estimate() > rhs.lock()->get_aux()->get_sp_estimate();
+        }
+    };
+    template<class Tracer>
+    void Dijkstra_ShortPath(graph_node_ptr_t s, Tracer tracer)
+    {
+        initialize_single_source(s);
+
+        std::priority_queue<graph_node_wptr_t,  std::vector<graph_node_wptr_t>, NodeGreaterPriorityHelper> Q;
+        Q.push(s);
+
+        std::set<graph_node_wptr_t> S;
+        while(!Q.empty())
+        {
+            auto n = Q.top().lock();
+            Q.pop();
+            S.insert(n);
+
+            const auto& adj_list = table[n];
+            for(const auto child : adj_list)
+            {
+                relax(n, child.first, child.second, tracer);
+            }
+
+            //decrease-key
+            std::priority_queue<graph_node_wptr_t,  std::vector<graph_node_wptr_t>, NodeGreaterPriorityHelper>().swap(Q);//Q.clear();
+            for(auto g_v : table)
+            {
+                if(S.find(g_v.first) != S.end())
+                {
+                    continue;
+                }
+                Q.push(g_v.first);
+            }
+        }
+    }
 };
 }
 #endif //SHORT_PATH_GRAPH_LIST_HPP
