@@ -110,8 +110,8 @@ find_max_subarray_linear(const std::vector<T>& array, left_index_t low, right_in
     left_index_t max_subarray_left = 0, i = std::numeric_limits<T>::min();
     left_index_t max_subarray_right = 0;
     T max_sum = array[max_subarray_left];
-    T sum = max_sum;//std::numeric_limits<T>::min();
-    T sum_candidate = 0;//std::numeric_limits<T>::min();
+    T sum = max_sum;
+    T sum_candidate = std::numeric_limits<T>::min();
     for(index_t j = low + 1; j <= high; j++)
     {
         // Max Subarray for A[1...j + 1] is:
@@ -136,25 +136,31 @@ find_max_subarray_linear(const std::vector<T>& array, left_index_t low, right_in
             continue;
         }
 
-        // set i as:  1 <= i <=j+1
+        // set `i` positioning as: 1 <= i <= j+1
+        // In this case A is first positive value (after latter negative)
         if(i == std::numeric_limits<T>::min())
         {
             i = j;
             sum_candidate = array[j];
         }
-        else
+        else //another positive A the make addition
         {
             sum_candidate += array[j];
         }
 
+        /*
+         * Make comparison subarrays for both
+         * A[1...j + 1] and A[i...j + 1]
+         */
         if(sum_candidate > sum)
         {
+            // exchange `sum` when find better candidate
             max_subarray_left = i;
             max_subarray_right = j;
             sum = sum_candidate;
             max_sum = sum;
 
-
+            // reset candidate
             i = std::numeric_limits<T>::min();
             sum_candidate = std::numeric_limits<T>::min();
         }
