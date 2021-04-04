@@ -1,5 +1,10 @@
 cmake_minimum_required (VERSION 3.0)
 
+# Add googletest directly to our build. This defines
+# the gtest and gtest_main targets.
+
+
+
 file (GLOB SUITE_SRC *.cpp)
 foreach (file ${SUITE_SRC})
     get_filename_component(filename ${file} NAME_WLE)
