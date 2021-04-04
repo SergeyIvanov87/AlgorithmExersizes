@@ -96,5 +96,71 @@ find_max_subarray(const std::vector<T>& array, left_index_t low, right_index_t h
     return { res_low, res_right, res_sum };
 }
 
+namespace linear
+{
+template<class T, class Tracer>
+std::tuple<left_index_t, right_index_t, T>
+find_max_subarray_linear(const std::vector<T>& array, left_index_t low, right_index_t high, Tracer tracer)
+{
+    if(array.empty())
+    {
+        throw std::runtime_error("Array is empty");
+    }
 
+    left_index_t max_subarray_left = 0, i = std::numeric_limits<T>::min();
+    left_index_t max_subarray_right = 0;
+    T max_sum = array[max_subarray_left];
+    T sum = max_sum;//std::numeric_limits<T>::min();
+    T sum_candidate = 0;//std::numeric_limits<T>::min();
+    for(index_t j = low + 1; j <= high; j++)
+    {
+        // Max Subarray for A[1...j + 1] is:
+        // 1) A[1...j]
+        //or
+        // 2) A[i...j]
+        // where `i` as  1 <= i  <= j + 1
+
+        sum = sum + array[j];
+        if(sum > max_sum)
+        {
+            // it's max then increment `j`
+            max_subarray_right = j;
+            max_sum = sum;
+        }
+
+        //if array[i] is negative then reset index `i`
+        if(array[j] < 0)
+        {
+            i = std::numeric_limits<T>::min();
+            sum_candidate = std::numeric_limits<T>::min();
+            continue;
+        }
+
+        // set i as:  1 <= i <=j+1
+        if(i == std::numeric_limits<T>::min())
+        {
+            i = j;
+            sum_candidate = array[j];
+        }
+        else
+        {
+            sum_candidate += array[j];
+        }
+
+        if(sum_candidate > sum)
+        {
+            max_subarray_left = i;
+            max_subarray_right = j;
+            sum = sum_candidate;
+            max_sum = sum;
+
+
+            i = std::numeric_limits<T>::min();
+            sum_candidate = std::numeric_limits<T>::min();
+        }
+    }
+
+    return {max_subarray_left, max_subarray_right, max_sum};
+}
+}
 }
