@@ -13,7 +13,9 @@ auto trans_printer = [](const auto& in, const auto &out) {
         ss << "\tIN nullptr\n\n" << std::endl;
         return;
     }
-    ss << "\n\t" << in.get() << ": " << in->value << ", {" << in->get_aux()->get_sp_estimate() << "}" << ", pred: " << in->get_aux()->get_predescessor().get()
+    ss << "\n\t" << in.get() << ": " << in->value
+       << ", {" << in->get_aux()->get_sp_estimate() << "}"
+       << ", pred: " << in->get_aux()->get_predescessor().get()
        << "\n---->\n";
 
     if(!out) {
@@ -21,7 +23,9 @@ auto trans_printer = [](const auto& in, const auto &out) {
         return;
     }
 
-    ss << "\t" << out.get() << ": " << out->value << ", {" << out->get_aux()->get_sp_estimate() << "}" << ", pred: " << out->get_aux()->get_predescessor().get()
+    ss << "\t" << out.get() << ": " << out->value
+       << ", {" << out->get_aux()->get_sp_estimate() << "}"
+       << ", pred: " << out->get_aux()->get_predescessor().get()
        << "\n\n" << std::endl;
 };
 
@@ -97,6 +101,5 @@ static void Dijkstra_ShortPath_Bench(benchmark::State& state) {
     }
 }
 BENCHMARK(Dijkstra_ShortPath_Bench);
-
 
 BENCHMARK_MAIN();
