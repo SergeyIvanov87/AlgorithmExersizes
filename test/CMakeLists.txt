@@ -5,5 +5,6 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/../googletest-src
                  EXCLUDE_FROM_ALL)
 
 add_subdirectory(graph)
+add_subdirectory(heap)
 add_subdirectory(matrix)
 add_subdirectory(max_subarray)
