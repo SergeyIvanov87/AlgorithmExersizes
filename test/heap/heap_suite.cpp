@@ -3,7 +3,9 @@
 #include <numeric>
 #include <utility>
 
-#include "heap/heap_properties.hpp"
+#include "heap/heap_operations.hpp"
+#include "heap/priority_queue.hpp"
+
 #include <gtest/gtest.h>
 
 #include "utils/printer.hpp"
@@ -142,4 +144,20 @@ INSTANTIATE_TEST_SUITE_P(HeapSortGroup, HeapSortFixture,
                          ));
 
 
+
+
+
+TEST(PriorityQueueSuite, creation)
+{
+    LambdaTracer tracer(printer_a<int>, printer_cmp<int>, printer_largest<int>, printer_exchanged<int>);
+
+    priority_queue<int> pq;
+    pq.insert(100, tracer);
+    pq.insert(200, tracer);
+    pq.insert(10, tracer);
+    pq.insert(20, tracer);
+    pq.insert(900, tracer);
+
+    ASSERT_EQ(pq.top(), 900);
+}
 }
