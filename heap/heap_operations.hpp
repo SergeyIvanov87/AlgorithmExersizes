@@ -92,6 +92,7 @@ template<class T, class Trace, class Comparison = std::less<T>>
 void heap_sort(array_t<T>& A, Trace tracer, Comparison cmp = Comparison())
 {
     build_heap(A, A.size(), tracer, cmp);
+
     for(size_t i = A.size(); i != 1; i-- )
     {
         std::swap(A[0], A[i - 1]);

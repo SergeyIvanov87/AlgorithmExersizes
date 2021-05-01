@@ -9,8 +9,6 @@
 #include <gtest/gtest.h>
 
 #include "utils/printer.hpp"
-namespace heap
-{
 
 template<class ...Lambdas>
 struct LambdaTracer : public Lambdas...
@@ -23,6 +21,8 @@ struct LambdaTracer : public Lambdas...
 };
 
 
+namespace heap
+{
 template<class T>
 auto printer_a = [](const array_t<T>& A, index_t i, std::initializer_list<size_t> highlight_indices = {})
 {
@@ -145,19 +145,52 @@ INSTANTIATE_TEST_SUITE_P(HeapSortGroup, HeapSortFixture,
 
 
 
-
+template<class T>
+auto printer_exchanged_info = [](const array_t<T>& A, std::initializer_list<size_t> highlight_indices = {}, std::string info = std::string())
+{
+    if (!info.empty())
+    {
+        std::cout << info << std::endl;
+    }
+    ::utils::print_array_with_indices(std::cout, A, highlight_indices);
+};
 
 TEST(PriorityQueueSuite, creation)
 {
-    LambdaTracer tracer(printer_a<int>, printer_cmp<int>, printer_largest<int>, printer_exchanged<int>);
+    LambdaTracer tracer(printer_a<int>, printer_cmp<int>, printer_largest<int>, printer_exchanged_info<int>);
 
     priority_queue<int> pq;
     pq.insert(100, tracer);
+    std::cout << std::endl;
+
     pq.insert(200, tracer);
+    std::cout << std::endl;
+
     pq.insert(10, tracer);
+    std::cout << std::endl;
+
     pq.insert(20, tracer);
+    std::cout << std::endl;
+
     pq.insert(900, tracer);
+    std::cout << std::endl;
 
     ASSERT_EQ(pq.top(), 900);
+
+    pq.extract_top(tracer);
+    std::cout << std::endl;
+    ASSERT_EQ(pq.top(), 200);
+
+    pq.extract_top(tracer);
+    std::cout << std::endl;
+    ASSERT_EQ(pq.top(), 100);
+
+    pq.extract_top(tracer);
+    std::cout << std::endl;
+    ASSERT_EQ(pq.top(), 20);
+
+    pq.extract_top(tracer);
+    std::cout << std::endl;
+    ASSERT_EQ(pq.top(), 10);
 }
 }

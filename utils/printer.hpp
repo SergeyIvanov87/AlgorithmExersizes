@@ -2,6 +2,7 @@
 #define PRINTER_HPP
 
 #include <initializer_list>
+#include <map>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -20,9 +21,28 @@ std::ostream& bold_off(std::ostream& os)
     return os << "\e[0m";
 }
 
-using highlighter_table_t = std::map<size_t, std::pair<std::string, std::string>>;
 template<class T>
-std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& A, const highlighter_table_t& highlight_indices = {})
+std::string to_string(std::initializer_list<T> l)
+{
+    std::stringstream ss;
+    for (T _ : l)
+    {
+        ss << _ << ", ";
+    }
+
+    std::string str = ss.str();
+    if(!str.empty())
+    {
+        str.pop_back();
+        str.pop_back();
+    }
+    return str;
+}
+
+using highlighter_table_t = std::map<size_t, std::pair<std::string, std::string>>;
+
+template<class T>
+std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& A, const highlighter_table_t& highlight_indices)
 {
     std::stringstream values;
     std::stringstream indices;
@@ -70,11 +90,11 @@ std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& 
 template<class T>
 std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& array)
 {
-    return print_array_with_indices(out, array);
+    return print_array_with_indices(out, array, highlighter_table_t{});
 }
 
 template<class T>
-std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& A, std::initializer_list<size_t> highlight_indices = {})
+std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& A, std::initializer_list<size_t> highlight_indices)
 {
     highlighter_table_t highlight_indices_with_text;
     for(size_t i : highlight_indices)
@@ -92,6 +112,7 @@ std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& 
     }
     return print_array_with_indices(out, A, highlight_indices_with_text);
 }
+
 }
 
 #endif

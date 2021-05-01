@@ -14,7 +14,7 @@ namespace utils
 {
     index_t parent(index_t i)
     {
-         return i / 2;
+         return i == 0 ? 0 : (i  - 1 ) / 2;
     }
 
     index_t left(index_t i)
