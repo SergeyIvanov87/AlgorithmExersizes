@@ -75,7 +75,7 @@ INSTANTIATE_TEST_SUITE_P(HeapSortGroup, YoungTableauBuildFixture_3x3,
                              YoungTBuildParams_3x3 {
                                             {9, 16, 3, 2, 4, 8},
                                             {}, {},
-                                            {16, 9, 8, 4, 3, 2}}
+                                            {16, 9, 8, 4, 3, 2, std::numeric_limits<int>::min(), std::numeric_limits<int>::min(), std::numeric_limits<int>::min()}}
                          ));
 
 #undef COMMA

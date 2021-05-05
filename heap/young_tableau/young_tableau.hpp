@@ -6,16 +6,23 @@
 
 namespace heap
 {
-template<class T, int M, int N, class Comparison = std::less<T>>
+template<class T, int M, int N, class SequencialOrder = std::less<T>>
 struct young_tableau
 {
     using mat_t = std::vector<T>;
 
     young_tableau()
     {
+        // fill initial table values: -inf or + inf
         data.resize(M * N );
-        std::fill(data.begin(), data.end(), std::numeric_limits<T>::max());
+        std::fill(data.begin(), data.end(),
+                  std::is_same<SequencialOrder, std::less<T>>::value
+                  ?
+                  std::numeric_limits<T>::min()
+                  :
+                  std::numeric_limits<T>::max());
 
+        // keep the slot for a next insertion
         next_free_index = 0;
     }
 
@@ -53,22 +60,33 @@ struct young_tableau
                                std::to_string(N));
         }
 
-        size_t change_index = row_index * N + column_index;
-        if( cmp(new_value, data[change_index]))
+        int change_index = row_index * N + column_index;
+
+        // cannot change key for lesser value ( or greater) than before
+        if( order(new_value, data[change_index]))
         {
             throw std::runtime_error(std::string(__PRETTY_FUNCTION__) +
-                                     " incorrect new key. Comparison condition is brokern");
+                                     " incorrect new key. SequencialOrder condition is broken: old key: " +
+                                     std::to_string(data[change_index]) + ", new key: " +
+                                     std::to_string(new_value));
         }
 
         data[change_index] = new_value;
+
+        // inserted key may brake table invariant:
+        // next element should be lesser than LEFT
+        // and
+        // lesser than TOP neighbors
         while(change_index != 0 &&
               (
-              !cmp(data[change_index], data[get_top_neighbor_index(change_index)]) or
-              !(cmp(data[change_index], data[get_left_neighbor_index(change_index)]))
+              order(data[get_top_neighbor_index(change_index)], data[change_index] ) or
+              (order(data[get_left_neighbor_index(change_index)], data[change_index]))
               ))
         {
-            //swap with left
+            //swap with LEFT
             std::swap(data[change_index], data[get_left_neighbor_index(change_index)]);
+
+            // go to LEFT and check invariant again
             change_index = get_left_neighbor_index(change_index);
         }
     }
@@ -77,12 +95,12 @@ private:
 
     static int get_top_neighbor_index(int index)
     {
-        return index < N ? -1 : index  - N;
+        return index < N ? 0 : index  - N;
     }
 
     static int get_left_neighbor_index(int index)
     {
-        return index % N ? index - 1 : -1;
+        return index == 0 ? 0 : index - 1;
     }
 
     static int row_index(int index)
@@ -98,7 +116,7 @@ private:
     size_t next_free_index;
     mat_t data;
 
-    Comparison cmp;
+    SequencialOrder order;
 };
 }
 
