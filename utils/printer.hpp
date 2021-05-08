@@ -113,6 +113,19 @@ std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& 
     return print_array_with_indices(out, A, highlight_indices_with_text);
 }
 
+
+
+template<class ...Lambdas>
+struct LambdaTracer : public Lambdas...
+{
+    LambdaTracer(Lambdas ...l) :
+        Lambdas(l)...
+    {}
+
+    using Lambdas::operator () ...;
+};
+
+
 }
 
 #endif
