@@ -10,17 +10,6 @@
 
 #include "utils/printer.hpp"
 
-template<class ...Lambdas>
-struct LambdaTracer : public Lambdas...
-{
-    LambdaTracer(Lambdas ...l) :
-        Lambdas(l)...
-    {}
-
-    using Lambdas::operator () ...;
-};
-
-
 namespace heap
 {
 template<class T>
@@ -80,7 +69,7 @@ auto printer_exchanged = [](const array_t<T>& A, std::initializer_list<size_t> h
 
 TEST(HeapSuite, Heapify)
 {
-    LambdaTracer tracer(printer_a<int>, printer_cmp<int>, printer_largest<int>, printer_exchanged<int>);
+    ::utils::LambdaTracer tracer(printer_a<int>, printer_cmp<int>, printer_largest<int>, printer_exchanged<int>);
 
     array_t<int> A{10, 2, 6, 4, 5, 3, 4};
     array_t<int> AA = A;
@@ -96,7 +85,7 @@ TEST(HeapSuite, Heapify)
 
 TEST(HeapSuite, BuildHeap)
 {
-    LambdaTracer tracer(printer_a<int>, printer_cmp<int>, printer_largest<int>, printer_exchanged<int>);
+    ::utils::LambdaTracer tracer(printer_a<int>, printer_cmp<int>, printer_largest<int>, printer_exchanged<int>);
 
     array_t<int> A{4, 1, 3, 2, 16, 9, 10, 14, 8, 7};
 
@@ -120,7 +109,7 @@ TEST_P(HeapSortFixture, HeapSortTest)
     in_array_t array = std::get<0>(GetParam());
     const sorted_array_t& expected = std::get<1>(GetParam());
 
-    LambdaTracer tracer(printer_a<int>, printer_cmp<int>, printer_largest<int>, printer_exchanged<int>);
+    ::utils::LambdaTracer tracer(printer_a<int>, printer_cmp<int>, printer_largest<int>, printer_exchanged<int>);
     heap_sort(array, tracer);
     ASSERT_EQ(array, expected) << "Sorted array is not equal with expected";
 }
@@ -157,7 +146,7 @@ auto printer_exchanged_info = [](const array_t<T>& A, std::initializer_list<size
 
 TEST(PriorityQueueSuite, creation)
 {
-    LambdaTracer tracer(printer_a<int>, printer_cmp<int>, printer_largest<int>, printer_exchanged_info<int>);
+    ::utils::LambdaTracer tracer(printer_a<int>, printer_cmp<int>, printer_largest<int>, printer_exchanged_info<int>);
 
     priority_queue<int> pq;
     pq.insert(100, tracer);
