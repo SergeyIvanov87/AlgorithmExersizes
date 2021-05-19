@@ -66,7 +66,7 @@ std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& 
         value_formatted_str.resize(max_column_size, ' ');
 
         std::string index_formatted_str(max_column_size - index_str.size(), ' ');
-        index_formatted_str.insert(index_str.size() / 2, index_str);
+        index_formatted_str.insert(index_formatted_str.size() / 2, index_str);
 
         if (highlighted_pos_it != highlight_indices.end())
         {
