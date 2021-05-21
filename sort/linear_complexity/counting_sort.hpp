@@ -30,12 +30,12 @@ do { \
 
 
 template<class T, class U, class Tracer>
-void countingsort(std::vector<T> &A, std::vector<T>& B, U alphabet_size, Tracer tracer)
+void countingsort(std::vector<T> &A, std::vector<T>& B, U alphabet_size, Tracer tracer, U exp = 1)
 {
     std::vector<T> C(alphabet_size, T(0));
     for(size_t i = 0; i < A.size(); i ++)
     {
-        T elem_value = A[i];
+        T elem_value = (A[i] / exp) % alphabet_size; // % by `alphabet_size` is for radix_sort
         C[elem_value] = C[elem_value] + 1;
 
         TRACE_CUR_INDEX(i);
@@ -54,8 +54,10 @@ void countingsort(std::vector<T> &A, std::vector<T>& B, U alphabet_size, Tracer 
     for(size_t i = A.size(); i != 0; i --)
     {
         auto j = i - 1;
-        B[C[A[j]] - 1 ] = A[j];
-        C[A[j]] = C[A[j]] - 1;
+
+        T elem_value = (A[j] / exp) % alphabet_size; // % by `alphabet_size` is for radix_sort
+        B[C[elem_value] - 1] = A[j];   //initial value (not by module `alphabet_size`) is for radix sort
+        C[elem_value] = C[elem_value] - 1;
 
         TRACE_INSERTION_ELEMENT_IN_ORDER(j)
     }
