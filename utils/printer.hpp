@@ -42,7 +42,7 @@ std::string to_string(std::initializer_list<T> l)
 using highlighter_table_t = std::map<size_t, std::pair<std::string, std::string>>;
 
 template<class T>
-std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& A, const highlighter_table_t& highlight_indices)
+std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& A, const highlighter_table_t& highlight_indices, const std::string& prefix = std::string())
 {
     std::stringstream values;
     std::stringstream indices;
@@ -80,21 +80,21 @@ std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& 
         }
     }
 
-    out << "array: " << values.str() << std::endl;
-    out << "index: " << indices.str() << std::endl;
+    out << prefix << "array: " << values.str() << std::endl;
+    out << prefix <<"index: " << indices.str() << std::endl;
 
     return out;
 }
 
 
 template<class T>
-std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& array)
+std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& array, const std::string& prefix = std::string())
 {
-    return print_array_with_indices(out, array, highlighter_table_t{});
+    return print_array_with_indices(out, array, highlighter_table_t{}, prefix);
 }
 
 template<class T>
-std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& A, std::initializer_list<size_t> highlight_indices)
+std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& A, std::initializer_list<size_t> highlight_indices, const std::string& prefix = std::string())
 {
     highlighter_table_t highlight_indices_with_text;
     for(size_t i : highlight_indices)
@@ -110,7 +110,7 @@ std::ostream& print_array_with_indices(std::ostream& out, const std::vector<T>& 
             std::get<1>(highlight_indices_with_text[i]) = ")";
         }
     }
-    return print_array_with_indices(out, A, highlight_indices_with_text);
+    return print_array_with_indices(out, A, highlight_indices_with_text, prefix);
 }
 
 
