@@ -50,6 +50,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 # Exersizes
 add_subdirectory(graphs)
 
+add_subdirectory(data_structure)
 # Test
 add_subdirectory(test)
 
