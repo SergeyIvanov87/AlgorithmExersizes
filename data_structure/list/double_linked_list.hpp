@@ -17,14 +17,18 @@ class double_linked_list
         std::weak_ptr<node> prev;
         std::shared_ptr<node> next;
 
-        std::string to_string() const
+        void dump(std::ostream& out, std::string prefix = std::string("")) const
         {
-            char ptr[sizeof(size_t)] = {0};
-            sprintf(ptr, "%p", this);
+            char ptr[128] = {0};
 
-            std::string ret(ptr);
-            ret += " : " + std::to_string(key);
-            return ret;
+            sprintf(ptr, "%p", (prev.lock() ? prev.lock().get() : nullptr));
+            out << prefix << "<-PREV : [" << ptr  << "]" << std::endl;
+
+            sprintf(ptr, "%p", (next ? next.get() : nullptr));
+            out << prefix << "  NEXT : [" << ptr  << "]->"<< std::endl;
+
+            sprintf(ptr, " [%p", this);
+            out << prefix << ptr << " : " + std::to_string(key) << "]" << std::endl;
         }
     };
 
@@ -39,7 +43,7 @@ public:
     }
 
     template<class Tracer>
-    node_ptr search(const T& key, Tracer tracer)
+    node_ptr search(const T& key, Tracer& tracer)
     {
         node_ptr x = head;
         while (x and x->key != key)
@@ -52,13 +56,19 @@ public:
         return x;
     }
 
-    void insert(node_ptr n) //in beginning
+    template<class Tracer>
+    void insert(node_ptr n, Tracer& tracer) //in beginning
     {
+        tracer(n);
+
         n->next = head;
         if (head)
         {
             head->prev = n;
         }
+
+        tracer.reset_prefix();
+        tracer(n);
         head = n;
     }
 
