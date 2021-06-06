@@ -7,6 +7,7 @@
 
 #include "data_structure/list/double_linked_list.hpp"
 #include "data_structure/list/double_linked_list_sentinel.hpp"
+#include "data_structure/list/double_lonked_xor_ptr.hpp"
 
 template<template<class> class ListImpl>
 using list_t = ListImpl<int>;
@@ -59,7 +60,13 @@ namespace trace
         }
 
         template<class T>
-        void operator() (const T& node_item)
+        void operator() (const std::shared_ptr<T>& node_item)
+        {
+            operator()(node_item.get());
+        }
+
+        template<class T>
+        void operator() (const T* node_item)
         {
             VisitingTracer::operator ()(node_item);
             if (node_item)
@@ -152,6 +159,25 @@ INSTANTIATE_TEST_SUITE_P(DoubleLLSentinelGroup, DoubleLLSentinelSearchFixture,
                                             {},
                                             {}, 1, 0},
                             DoubleLLSentinelSearchParams{
+                                            {},
+                                            {5,8,10,4,3,11,7}, 99, 7}
+                         ));
+
+using DoubleLLXorSearchParams = LinkedListSearchParams<double_linked_xor_list>;
+using DoubleLLXorSearchFixture = LinkedListSearchFixture<double_linked_xor_list>;
+TEST_DEFINITION(DoubleLLXorSearchFixture, search)
+INSTANTIATE_TEST_SUITE_P(DoubleLLXORlGroup, DoubleLLXorSearchFixture,
+                         testing::Values(
+                            DoubleLLXorSearchParams{
+                                            {},
+                                            {1,2,3,4,5,6,7}, 7, 0},
+                            DoubleLLXorSearchParams{
+                                            {},
+                                            {1,2,3,4,5,6,7}, 1, 6},
+                            DoubleLLXorSearchParams{
+                                            {},
+                                            {}, 1, 0},
+                            DoubleLLXorSearchParams{
                                             {},
                                             {5,8,10,4,3,11,7}, 99, 7}
                          ));
