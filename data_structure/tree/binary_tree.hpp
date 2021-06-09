@@ -106,72 +106,27 @@ public:
         if (!z->left)
         {
             // no left
-            if (p->left == z)
-            {
-                p->left = z->right;
-            }
-            else
-            {
-                p->right = z->right;
-            }
-
-            z->parent.lock().reset();
-            z->right.reset();
+            transplant(z, z->right);
             return;
         }
         else if(!z->right)
         {
             // no right
-            if (p->left == z)
-            {
-                p->left = z->left;
-            }
-            else
-            {
-                p->right = z->left;
-            }
-
-            z->parent.lock().reset();
-            z->right.reset();
+            transplant(z, z->left);
             return;
         }
         else
         {
-            //both exist
-            node_ptr r = z->right;
-
-            if(!r->left)
+            node_ptr y = min_impl(z->right, tracer);
+            if(y->parent.lock() != z)
             {
-                //simple
-                node_ptr l = z->left;
-                transplant(z, r);
-                r->left = l;
-
-                z->parent.lock().reset();
-                z->right.reset();
-                return;
-            }
-            else
-            {
-                //hard
-
-                //find z successor
-                node_ptr y = min_impl(r, tracer);
                 transplant(y, y->right);
-                y->right = r;
-
-                if (p->right == z)
-                {
-                    p->right = y;
-                }
-                else
-                {
-                    p->left = y;
-
-                }
-                y->left = z->left;
-                y->parent = p;
+                y->right = z->right;
+                y->right->parent.lock() = y;
             }
+            transplant(z, y);
+            y->left = z->left;
+            y->left->parent.lock() = y;
         }
 
         z->parent.lock().reset();
