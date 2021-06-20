@@ -5,7 +5,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/../googletest-src
                  EXCLUDE_FROM_ALL)
 
 add_subdirectory(codility)
-
+add_subdirectory(data_structure)
 
 add_subdirectory(graph)
 add_subdirectory(heap)
