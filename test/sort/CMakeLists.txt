@@ -1,2 +1,3 @@
+add_subdirectory(mergesort)
 add_subdirectory(quicksort)
 add_subdirectory(linear_complexity)
