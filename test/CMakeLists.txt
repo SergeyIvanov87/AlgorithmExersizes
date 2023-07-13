@@ -17,3 +17,4 @@ add_subdirectory(sort)
 
 add_subdirectory(codility)
 add_subdirectory(lc)
+add_subdirectory(others)
