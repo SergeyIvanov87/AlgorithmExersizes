@@ -1,6 +1,7 @@
 #ifndef MATRIX_HPP
 #define MATRIX_HPP
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <functional>

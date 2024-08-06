@@ -169,4 +169,48 @@ find_max_subarray_linear(const std::vector<T>& array, left_index_t low, right_in
     return {max_subarray_left, max_subarray_right, max_sum};
 }
 }
+
+
+namespace linear2
+{
+template<class T, class Tracer>
+std::tuple<left_index_t, right_index_t, T>
+find_max_subarray_linear(const std::vector<T>& array, left_index_t low, right_index_t high, Tracer tracer)
+{
+    if(array.empty())
+    {
+        throw std::runtime_error("Array is empty");
+    }
+
+    T max_array_sum = 0, sum_from_start = array[low], sum_from_i = low;
+    size_t i = low, l = low, r = 0;
+    size_t max_left = low, max_right = low;
+    for (size_t j = low+1; j < high; j++)
+    {
+        /*
+        сравнить предыдущий и i:j+1, где i - любое, в т.ч i=0 & i =j
+        если, сравнение в пользу первого, то i - можно сбросить?
+        сравнение в пользу первого происходит, когда jый отрицательный? и этот отрицательный меньше, чем первый отрицательный в массиве [1...j]
+        сравнение в пользу второго, происходит ,если jый отрицательный и этот отрицательный больше, чем первыееее отрицательные в [1...j]
+        */
+        //if (sum_from_start < 0 && sum_from_start + array[j] > 0) { l = j; }
+        if(array[j] < 0) {
+            i = std::numeric_limits<size_t>::min();
+        }
+        if (i == std::numeric_limits<size_t>::min() && array[j] > 0)
+        {
+            i = j;
+        }
+
+        sum_from_start = sum_from_start + array[j];
+        if (sum_from_start > max_array_sum)
+        {
+            max_array_sum = sum_from_start;
+            r = j;
+            continue;
+        }
+    }
+    return std::make_tuple(l,r,max_array_sum);
+}
+}
 }

@@ -35,6 +35,16 @@ TEST_P(TreeWalkOrderFixture, inorder_walk)
         t.insert(binary_tree<int>::make_node(i_));
     }
 
+    std::shared_ptr<Node<int>> root;
+    for (auto i_ :init)
+    {
+        if (!root) {
+            root = Node<int>::make_node(i_);
+        }
+        else {
+            root->insert(i_);
+        }
+    }
     std::vector<int> inorder_path;
     t.inorder_tree_walk([&inorder_path](typename binary_tree<int>::node_ptr n)
     {
@@ -44,6 +54,19 @@ TEST_P(TreeWalkOrderFixture, inorder_walk)
         }
     });
     ASSERT_EQ(in_expected, inorder_path);
+
+    {
+        std::vector<int> inorder_path;
+        root->inorder_tree_walk([&inorder_path](std::shared_ptr<Node<int>> n)
+        {
+            if (n)
+            {
+                inorder_path.push_back(n->key);
+            }
+        });
+        ASSERT_EQ(in_expected, inorder_path);
+    }
+
 
     std::vector<int> preorder_path;
     auto preorder_tracer = [&preorder_path](typename binary_tree<int>::node_ptr n)
@@ -56,6 +79,19 @@ TEST_P(TreeWalkOrderFixture, inorder_walk)
     t.preorder_tree_walk(preorder_tracer);
     ASSERT_EQ(pre_expected, preorder_path);
 
+    {
+        std::vector<int> preorder_path;
+        auto preorder_tracer = [&preorder_path](std::shared_ptr<Node<int>> n)
+        {
+            if (n)
+            {
+                preorder_path.push_back(n->key);
+            }
+        };
+        root->preorder_tree_walk(preorder_tracer);
+        ASSERT_EQ(pre_expected, preorder_path);
+    }
+
     std::vector<int> postrder_path;
     auto postorder_tracer = [&postrder_path](typename binary_tree<int>::node_ptr n)
     {
@@ -66,6 +102,18 @@ TEST_P(TreeWalkOrderFixture, inorder_walk)
     };
     t.postorder_tree_walk(postorder_tracer);
     ASSERT_EQ(post_expected, postrder_path);
+    {
+        std::vector<int> postrder_path;
+        auto postorder_tracer = [&postrder_path](std::shared_ptr<Node<int>> n)
+        {
+            if (n)
+            {
+                postrder_path.push_back(n->key);
+            }
+        };
+        root->postorder_tree_walk(postorder_tracer);
+        ASSERT_EQ(post_expected, postrder_path);
+    }
 }
 
 
@@ -108,10 +156,27 @@ TEST_P(TreeSearchFixture, search)
         t.insert(binary_tree<int>::make_node(i_));
     }
 
-
+    std::shared_ptr<Node<int>> root;
+    for (auto i_ :init)
+    {
+        if (!root) {
+            root = Node<int>::make_node(i_);
+        }
+        else {
+            root->insert(i_);
+        }
+    }
     StdoutTracer stdout_tracer;
     auto got_node = t.search(key, stdout_tracer);
     ASSERT_TRUE((bool)got_node == expected_found);
+
+    {
+        if (root)
+        {
+            auto got_node = root->search(key, stdout_tracer);
+            ASSERT_TRUE((bool)got_node == expected_found);
+        }
+    }
 }
 
 INSTANTIATE_TEST_SUITE_P(TreeSearchGroup, TreeSearchFixture,
@@ -168,6 +233,18 @@ TEST_P(TreeDeleteFixture, delete)
         t.insert(binary_tree<int>::make_node(i_));
     }
 
+    std::shared_ptr<Node<int>> root;
+    for (auto i_ :init)
+    {
+        if (!root) {
+            root = Node<int>::make_node(i_);
+        }
+        else {
+            root->insert(i_);
+        }
+    }
+    if (!root) {return;}
+
     // find key to delete
     EmptyTracer empty_tracer;
     auto node_to_delete = t.search(delete_key, empty_tracer);
@@ -207,6 +284,48 @@ TEST_P(TreeDeleteFixture, delete)
     };
     t.postorder_tree_walk(postorder_tracer);
     ASSERT_EQ(post_expected, postrder_path);
+
+    {
+        // find key to delete
+        EmptyTracer empty_tracer;
+        auto node_to_delete = root->search(delete_key, empty_tracer);
+
+        // delete node
+        StdoutTracer stdout_tracer;
+        root->delete_node(node_to_delete, stdout_tracer);
+
+        std::vector<int> inorder_path;
+        root->inorder_tree_walk([&inorder_path](std::shared_ptr<Node<int>> n)
+        {
+            if (n)
+            {
+                inorder_path.push_back(n->key);
+            }
+        });
+        ASSERT_EQ(in_expected, inorder_path);
+
+        std::vector<int> preorder_path;
+        auto preorder_tracer = [&preorder_path](std::shared_ptr<Node<int>> n)
+        {
+            if (n)
+            {
+                preorder_path.push_back(n->key);
+            }
+        };
+        root->preorder_tree_walk(preorder_tracer);
+        ASSERT_EQ(pre_expected, preorder_path);
+
+        std::vector<int> postrder_path;
+        auto postorder_tracer = [&postrder_path](std::shared_ptr<Node<int>> n)
+        {
+            if (n)
+            {
+                postrder_path.push_back(n->key);
+            }
+        };
+        root->postorder_tree_walk(postorder_tracer);
+        ASSERT_EQ(post_expected, postrder_path);
+    }
 }
 
 INSTANTIATE_TEST_SUITE_P(TreeDeleteGroup, TreeDeleteFixture,

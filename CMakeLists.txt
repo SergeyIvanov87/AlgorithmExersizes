@@ -4,6 +4,8 @@ project(Exersizes
         VERSION ""
         LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #### GTEST ####
 # See `https://github.com/google/googletest/blob/master/googletest/README.md`
