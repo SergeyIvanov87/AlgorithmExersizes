@@ -1,9 +1,12 @@
 #ifndef SHORT_PATH_GRAPH_LIST_HPP
 #define SHORT_PATH_GRAPH_LIST_HPP
 
+#include <algorithm>
+
 #include <cassert>
 #include <list>
 #include <map>
+#include <ranges>
 #include <queue>
 #include <set>
 #include <stack>
@@ -281,6 +284,71 @@ public:
             }
         }
     }
+};
+
+
+struct GraphList
+{
+    using vertex_index = int;
+    using adjacent_list_t = std::set<vertex_index>;
+    using adjacent_map_t = std::map<vertex_index, adjacent_list_t>;
+
+    adjacent_map_t table;
+
+    void fill_graph(vertex_index v, std::initializer_list<vertex_index> depends, bool directional = false) {
+
+        adjacent_list_t l{depends};
+        table.emplace(v, std::move(l));
+
+        if (!directional) {
+            for (auto d_v : l) {
+                table[d_v].insert(v);
+            }
+        }
+    }
+
+    template<class Condition>
+    vertex_index dfs(vertex_index start_vertex_index, Condition cond)
+    {
+        std::vector<int> visited_vertices(table.size(), 0);
+        std::stack<vertex_index> vertices_to_visit;
+        vertices_to_visit.push(start_vertex_index);
+
+        while (!vertices_to_visit.empty()) {
+            // start
+            vertex_index vertex_to_visit = vertices_to_visit.top();
+            if (visited_vertices[vertex_to_visit] == 2)
+            {
+                vertices_to_visit.pop();
+                continue;
+            }
+
+            // add children for visiting
+            if(visited_vertices[vertex_to_visit] == 0)
+            {
+                // processing
+                if (cond(vertex_to_visit)) {
+                    return vertex_to_visit;
+                }
+
+                for (vertex_index child : table[vertex_to_visit]) {
+                    if (visited_vertices[child] == 0)
+                    {
+                        vertices_to_visit.push(child);
+                    }
+                }
+                visited_vertices[vertex_to_visit] = 1;
+            } else if (visited_vertices[vertex_to_visit] == 1) {
+                if (std::ranges::all_of(table[vertex_to_visit], [&] (vertex_index v) {
+                    return visited_vertices[v] == 2 or visited_vertices[v] == 1;
+                }) or table[vertex_to_visit].empty()) {
+                    visited_vertices[vertex_to_visit] = 2;
+                }
+            }
+        }
+        return -1;
+    }
+
 };
 }
 #endif //SHORT_PATH_GRAPH_LIST_HPP

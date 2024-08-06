@@ -14,6 +14,12 @@
             return false;
         };
 
+        auto printer_int = [](const auto& n)
+        {
+            std::cout << n << std::endl;
+            return false;
+        };
+
         auto trans_printer = [](const auto& in, const auto &out)
         {
             if(!in)
@@ -39,11 +45,11 @@ TEST(graphSuite, BellmanFordShortPath)
 
     short_path::graph_list graph_main;
 
-    short_path::graph_node_ptr_t s = graph_main.create_node("s");
-    short_path::graph_node_ptr_t t = graph_main.create_node("t");
-    short_path::graph_node_ptr_t x = graph_main.create_node("x");
-    short_path::graph_node_ptr_t y = graph_main.create_node("y");
-    short_path::graph_node_ptr_t z = graph_main.create_node("z");
+    short_path::graph_node_ptr_t s = graph_main.create_node("s");  // 0
+    short_path::graph_node_ptr_t t = graph_main.create_node("t");  // 1
+    short_path::graph_node_ptr_t x = graph_main.create_node("x");  // 2
+    short_path::graph_node_ptr_t y = graph_main.create_node("y");  // 3
+    short_path::graph_node_ptr_t z = graph_main.create_node("z");  // 4
 
     static const bool directional = true;
     graph_main.fill_graph(s, { {t, 6}, {y, 7}}, directional);
@@ -55,6 +61,16 @@ TEST(graphSuite, BellmanFordShortPath)
     std::cout << "graph DFS: " << std::endl;
     graph_main.dfs(s, printer);
 
+    {
+        short_path::GraphList graph_main;
+        graph_main.fill_graph(0, {1, 3}, directional);
+        graph_main.fill_graph(1, { 2, 3, 4}, directional);
+        graph_main.fill_graph(2, { 1}, directional);
+        graph_main.fill_graph(3, {2, 4}, directional);
+        graph_main.fill_graph(4, {2, 1}, directional);
+        std::cout << "graph DFS: " << std::endl;
+        graph_main.dfs(0, printer_int);
+    }
     std::cout << "Bellman-Ford" << std::endl;
     graph_main.BellmanFord_ShortPath(s, trans_printer);
 

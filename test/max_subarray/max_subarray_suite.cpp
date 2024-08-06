@@ -70,7 +70,7 @@ INSTANTIATE_TEST_SUITE_P(MaxSubArrayGroup, MaxSubArrayFixture,
                                                 {7, 10, 43}}
                          ));
 
-namespace linear
+namespace linear2
 {
 class MaxSubArrayLinearFixture : public testing::TestWithParam<MaxSubarrayTestParams> {};
 

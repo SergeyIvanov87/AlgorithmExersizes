@@ -287,4 +287,110 @@ private:
     }
 };
 }
+
+template<class K>
+struct Node: public std::enable_shared_from_this<Node<K>>
+{
+    std::shared_ptr<Node<K>> l_successor;
+    std::shared_ptr<Node<K>> r_successor;
+    std::weak_ptr<Node<K>> predescessor;
+    K key;
+
+    std::shared_ptr<Node<K>> insert(K val) {
+        if (val <= key) {
+            if (!l_successor) {
+                l_successor = make_node(val);
+                l_successor->predescessor = this->shared_from_this();
+                return l_successor;
+            }
+            return l_successor->insert(val);
+        }
+
+        if (!r_successor) {
+            r_successor = make_node(val);
+            r_successor->predescessor = this->shared_from_this();
+            return r_successor;
+        }
+        return r_successor->insert(val);
+    }
+
+    static std::shared_ptr<Node<K>> make_node(K k) {
+        auto n = std::make_shared<Node<K>>();
+        n->key = k;
+        return n;
+    }
+
+    template<class T>
+    void inorder_tree_walk(T tracer)
+    {
+        if (l_successor) {
+            l_successor->inorder_tree_walk(tracer);
+        }
+        tracer(this->shared_from_this());
+        if (r_successor) {
+            r_successor->inorder_tree_walk(tracer);
+        }
+    }
+
+    template<class Tracer>
+    void preorder_tree_walk(Tracer tracer)
+    {
+        tracer(this->shared_from_this());
+        if (l_successor) {
+            l_successor->preorder_tree_walk(tracer);
+        }
+        if (r_successor) {
+            r_successor->preorder_tree_walk(tracer);
+        }
+    }
+
+    template<class Tracer>
+    void postorder_tree_walk(Tracer tracer)
+    {
+        if (l_successor) {
+            l_successor->postorder_tree_walk(tracer);
+        }
+        if (r_successor) {
+            r_successor->postorder_tree_walk(tracer);
+        }
+        tracer(this->shared_from_this());
+    }
+
+    template<class Tracer>
+    std::shared_ptr<Node<K>> search(K k, Tracer t) {
+        if (k == this->key) {
+            return this->shared_from_this();
+        }
+
+        if (k < this->key) {
+            if (l_successor) {
+                return l_successor->search(k, t);
+            }
+        }
+
+        if (k > this->key) {
+            if (r_successor) {
+                return r_successor->search(k, t);
+            }
+        }
+        return {};
+    }
+
+    template<class Tracer>
+    void delete_node(std::shared_ptr<Node<K>> n, Tracer tracer)
+    {
+        if (!n) return;
+
+        auto parent = n->predescessor.lock();
+        if(parent)
+        {
+            if( n->key < parent->key) {
+                parent->l_successor.reset();
+            }
+            if( n->key > parent->key) {
+                parent->r_successor.reset();
+            }
+        }
+    }
+};
 #endif //BINARY_TREE_HPP
